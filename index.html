@@ -1,13 +1,64 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite App</title>
-  </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="/main.js"></script>
-  </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suika Game</title>
+    <link rel="stylesheet" href="/src/styles.css">
+</head>
+<body>
+    <div id="page-container">
+      <div id="left-ad" class="ad-space desktop-only">
+        <div class="ad-placeholder">AD</div>
+      </div>
+
+      <div id="game-container">
+          <canvas id="background-guide"></canvas>
+          <canvas id="guide-canvas"></canvas>
+          <div id="matter-js-canvas"></div>
+          <div id="game-ui">
+              <div id="top-ui">
+                  <div id="score-display">
+                      <div class="info-title">Score</div>
+                      <div id="score-value">0</div>
+                      <div id="best-score">Best: 0</div>
+                      <button id="top-score-button" class="control-button">Top Score</button>
+                  </div>
+                  <div id="next-fruit-preview">
+                      <div class="info-title">Next</div>
+                      <div id="next-fruit-image"></div>
+                  </div>
+                  <div id="control-buttons">
+                      <button id="restart-game-button" class="control-button">Restart</button>
+                      <button id="mute-button" class="control-button">Mute</button>
+                  </div>
+              </div>
+          </div>
+      </div>
+
+      <div id="right-ad" class="ad-space desktop-only">
+          <div class="ad-placeholder">AD</div>
+      </div>
+    </div>
+
+    <div id="game-over-overlay">
+      <div id="game-over-content">
+          <h1>Game Over</h1>
+          <p>Your Score</p>
+          <hr>
+          <p id="final-score">0</p>
+          <button id="restart-button">►</button>
+      </div>
+    </div>
+
+    <div id="leaderboard-overlay">
+        <div id="leaderboard-content">
+            <h2>Top 10 Scores</h2>
+            <ul id="leaderboard-list"></ul>
+            <button id="close-leaderboard">Close</button>
+        </div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+</body>
 </html>
