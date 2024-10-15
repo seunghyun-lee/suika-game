@@ -116,7 +116,8 @@ body, html {
     border-radius: 5px;
     cursor: pointer;
     font-size: 16px;
-    pointer-events: auto;
+    width: 80px;
+    height: 40px;
 }
 
 #best-score {
@@ -125,13 +126,16 @@ body, html {
 }
 
 .ad-space {
-    width: 160px;
-    height: 600px;
+    width: 160px; /* 또는 원하는 크기 */
+    height: 600px; /* 또는 원하는 크기 */
     margin: 0 20px;
-    background-color: #ddd;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+}
+
+#bottom-ad {
+    width: 100%;
+    height: 90px; /* 또는 원하는 크기 */
+    margin-top: 20px;
+    text-align: center;
 }
 
 .ad-placeholder {
@@ -139,14 +143,45 @@ body, html {
     color: #666;
 }
 
-#bottom-ad {
-    width: 100%;
-    height: 100px;
-    background-color: #ddd;
-    display: none;
+@media (max-width: 1024px) and (min-width: 401px) {
+    #game-container {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 4 / 9;
+        max-width: 400px;
+    }
+
+    #background-guide,
+    #guide-canvas,
+    #matter-js-canvas {
+        width: 100% !important;
+        height: 100% !important;
+    }
+    
+    #top-ui {
+        padding: 2vw;
+    }
+
+    #score-display,
+    #next-fruit-preview {
+        font-size: 14px;
+    }
+
+    .control-button {
+        font-size: 14px;
+    }
 }
 
-/* Desktop styles */
+@media (max-width: 1024px) {
+    .desktop-only {
+        display: none;
+    }
+
+    #bottom-ad {
+        height: 50px;
+    }
+}
+
 @media (min-width: 1024px) {
     .desktop-only {
         display: flex;

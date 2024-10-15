@@ -118,6 +118,9 @@ export function initGame(db) {
 
     setGameBackground();
 
+    resizeGame();
+    window.addEventListener('resize', resizeGame);
+
     const gameControls = document.querySelectorAll('.game-control');
     gameControls.forEach(control => {
         control.addEventListener('touchstart', preventPropagation, { passive: false });
@@ -144,13 +147,93 @@ export function initGame(db) {
     restartButton.addEventListener('click', handleRestartClick);
 }
 
-function createBoundaries() {
-    if (boundariesCreated) {
-        return;
+function resizeGame() {
+    const gameContainer = document.getElementById('game-container');
+    const windowWidth = window.innerWidth;
+
+    let oldWidth = canvasWidth;
+    let oldHeight = canvasHeight;
+
+    if (windowWidth <= 1024 && windowWidth > 400) {
+        const newWidth = Math.min(windowWidth, 400);
+        const newHeight = (newWidth * 9) / 4;
+
+        gameContainer.style.width = `${newWidth}px`;
+        gameContainer.style.height = `${newHeight}px`;
+
+        canvasWidth = newWidth;
+        canvasHeight = newHeight;
+    } else {
+        gameContainer.style.width = '400px';
+        gameContainer.style.height = '900px';
+        canvasWidth = 400;
+        canvasHeight = 900;
     }
-    boundariesCreated = true;
+    
+    backgroundCanvas.width = canvasWidth;
+    backgroundCanvas.height = canvasHeight;
+    guideCanvas.width = canvasWidth;
+    guideCanvas.height = canvasHeight;
+
+    if (render) {
+        render.canvas.width = canvasWidth;
+        render.canvas.height = canvasHeight;
+        render.options.width = canvasWidth;
+        render.options.height = canvasHeight;
+    }
+
+    const horizontalMargin = canvasWidth / 20;
+    const bottomMargin = canvasHeight / 7;
+
+    gameAreaWidth = canvasWidth - (2 * horizontalMargin);
+    gameAreaHeight = canvasHeight - bottomMargin - (canvasHeight / 4);
+    gameAreaTop = canvasHeight / 4;
+    gameAreaBottom = canvasHeight - bottomMargin;
+    gameAreaLeft = horizontalMargin;
+    gameAreaRight = canvasWidth - horizontalMargin;
+
+    scorelineY = gameAreaTop + ((gameAreaBottom - gameAreaTop) * 0.2);
+
+    createBoundaries();
+
+    setGameBackground();
+
+    if (currentFruit) {
+        let scaleX = canvasWidth / oldWidth;
+        let newX = currentFruit.position.x * scaleX;
+        newX = Math.max(gameAreaLeft + currentFruit.circleRadius, Math.min(newX, gameAreaRight - currentFruit.circleRadius));
+        
+        Body.setPosition(currentFruit, {
+            x: newX,
+            y: currentFruit.position.y
+        });
+    } else {
+        createNewFruit();
+    }
+
+    Composite.allBodies(world).forEach(body => {
+        if (body.label !== "topBoundary" && body.label !== "scoreLine" && !body.isStatic) {
+            let scaleX = canvasWidth / oldWidth;
+            let scaleY = canvasHeight / oldHeight;
+            let newX = body.position.x * scaleX;
+            let newY = body.position.y * scaleY;
+            
+            newX = Math.max(gameAreaLeft + body.circleRadius, Math.min(newX, gameAreaRight - body.circleRadius));
+            newY = Math.min(newY, gameAreaBottom - body.circleRadius);
+
+            Body.setPosition(body, {
+                x: newX,
+                y: newY
+            });
+        }
+    });
+}
+
+function createBoundaries() {
+    // 기존 경계 제거
+    Composite.clear(world, false, true);
+
     const wallThickness = 15;
-    const borderColor = '#B0B4BE';
 
     // 왼쪽 벽
     const leftWall = Bodies.rectangle(
@@ -158,12 +241,7 @@ function createBoundaries() {
         gameAreaTop + (gameAreaBottom - gameAreaTop) / 2,
         wallThickness,
         gameAreaBottom - gameAreaTop,
-        { 
-            isStatic: true, 
-            render: { 
-                visible: false
-            },  
-        }
+        { isStatic: true, render: { visible: false } }
     );
 
     // 오른쪽 벽
@@ -172,12 +250,7 @@ function createBoundaries() {
         gameAreaTop + (gameAreaBottom - gameAreaTop) / 2,
         wallThickness,
         gameAreaBottom - gameAreaTop,
-        { 
-            isStatic: true, 
-            render: { 
-                visible: false
-            }, 
-        }
+        { isStatic: true, render: { visible: false } }
     );
 
     // 바닥
@@ -186,14 +259,10 @@ function createBoundaries() {
         gameAreaBottom - wallThickness / 2,
         gameAreaWidth,
         wallThickness,
-        { 
-            isStatic: true, 
-            render: { 
-                visible: false
-            }, 
-        }
+        { isStatic: true, render: { visible: false } }
     );
 
+    // 상단 경계
     const top = Bodies.rectangle(
         gameAreaLeft + gameAreaWidth / 2,
         gameAreaTop,
@@ -203,13 +272,11 @@ function createBoundaries() {
             label: "topBoundary",
             isStatic: true, 
             isSensor: true,
-            render: { 
-                visible: false
-            }, 
+            render: { visible: false }
         }
-    )
+    );
 
-    scorelineY = gameAreaTop + ((gameAreaBottom - gameAreaTop) * 0.2);
+    // 점수 라인
     const scoreline = Bodies.rectangle(
         gameAreaLeft + gameAreaWidth / 2,
         scorelineY,
