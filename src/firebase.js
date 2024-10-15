@@ -1,10 +1,10 @@
 export const firebaseConfig = {
-    apiKey: "AIzaSyD9hgBxI7Hu9N-QK4l9zkN3lgavwopLQP0",
-    authDomain: "suika-game-5550c.firebaseapp.com",
-    databaseURL: "https://suika-game-5550c-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "suika-game-5550c",
-    storageBucket: "suika-game-5550c.appspot.com",
-    messagingSenderId: "585880822145",
-    appId: "1:585880822145:web:9a7beb930668ba11ff4880",
-    measurementId: "G-86LMBXJ51X"
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL,
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: import.meta.env.VITE_FIREBASE_APP_ID,
+    measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
