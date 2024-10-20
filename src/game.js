@@ -189,7 +189,7 @@ function resizeGame() {
     const windowWidth = window.innerWidth;
     const windowHeight = window.innerHeight;
     
-    const chromeAddressBarHeight = windowWidth <= 1024 ? 56 : 0;
+    const chromeAddressBarHeight = windowWidth <= 1024 ? 5 : 0;
 
     const availableHeight = windowHeight - chromeAddressBarHeight;
 
