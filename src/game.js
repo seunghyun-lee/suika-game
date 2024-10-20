@@ -7,6 +7,8 @@ const { Engine, Render, Runner, Bodies, Events, World, Body, Composite } = Matte
 
 let engine, render, runner, world;
 let currentFruit, nextFruit;
+let oldWidth = 400;
+let oldHeight = 900;
 let gameContainer, canvasWidth, canvasHeight;
 let gameArea, gameAreaWidth, gameAreaHeight;
 let gameAreaTop, gameAreaBottom, gameAreaLeft, gameAreaRight;
@@ -18,6 +20,7 @@ let bestScore = 0;
 let lastSavedScore = 0;
 let scorelineY;
 let guideCanvas, guideCtx;
+let userId;
 let isGameOver = false;
 let boundariesCreated = false;
 let gamePaused = false;
@@ -28,6 +31,8 @@ let interactionStarted = false;
 let listenersAdded = false;
 const dropSound = new Audio('./sounds/drop.mp3');
 const mergeSound = new Audio('./sounds/merge.wav');
+let bgmAudio = new Audio('./sounds/bgm.mp3');
+let isBgmPlaying = false;
 const imageCache = {};
 
 function displayLeaderboard(scores) {
@@ -137,51 +142,81 @@ export function initGame(db) {
     const closeLeaderboardButton = document.getElementById('close-leaderboard');
     closeLeaderboardButton.addEventListener('click', hideLeaderboard);
 
+    const settingButton = document.getElementById('setting-button');
+    if (settingButton) {
+        settingButton.addEventListener('click', showSettingsOverlay);
+    }
+
+    const closeSettingsButton = document.getElementById('close-settings');
+    if (closeSettingsButton) {
+        closeSettingsButton.addEventListener('click', hideSettingsOverlay);
+    }
+
     const restartGameButton = document.getElementById('restart-game-button');
     restartGameButton.addEventListener('click', restartGame);
+
+    const restartButton = document.getElementById('restart-button');
+    restartButton.addEventListener('click', handleRestartClick);
 
     const muteButton = document.getElementById('mute-button');
     muteButton.addEventListener('click', toggleMute);
 
-    const restartButton = document.getElementById('restart-button');
-    restartButton.addEventListener('click', handleRestartClick);
+    const bgmButton = document.getElementById('bgm-button');
+    bgmButton.addEventListener('click', toggleBgm);
+
+    bgmAudio.loop = true;
+    bgmAudio.volume = 0.5;
+
+    userId = getUserId();
+    updateUserIdDisplay();
+
+    const userIdDisplay = document.getElementById('user-id-display');
+    userIdDisplay.addEventListener('click', showUserIdOverlay);
+
+    const saveUserIdButton = document.getElementById('save-user-id');
+    saveUserIdButton.addEventListener('click', saveNewUserId);
+
+    const cancelUserIdButton = document.getElementById('cancel-user-id');
+    cancelUserIdButton.addEventListener('click', hideUserIdOverlay);
+
+    if (navigator.standalone) {
+        document.documentElement.style.setProperty('--safe-area-inset-top', `${window.screen.height - document.documentElement.clientHeight}px`);
+    }
 }
 
 function resizeGame() {
     const gameContainer = document.getElementById('game-container');
     const windowWidth = window.innerWidth;
-
-    let oldWidth = canvasWidth;
-    let oldHeight = canvasHeight;
-
-    if (windowWidth <= 1024 && windowWidth > 400) {
-        const newWidth = Math.min(windowWidth, 400);
-        const newHeight = (newWidth * 9) / 4;
-
-        gameContainer.style.width = `${newWidth}px`;
-        gameContainer.style.height = `${newHeight}px`;
-
-        canvasWidth = newWidth;
-        canvasHeight = newHeight;
-    } else {
-        gameContainer.style.width = '400px';
-        gameContainer.style.height = '900px';
-        canvasWidth = 400;
-        canvasHeight = 900;
-    }
+    const windowHeight = window.innerHeight;
     
-    backgroundCanvas.width = canvasWidth;
-    backgroundCanvas.height = canvasHeight;
-    guideCanvas.width = canvasWidth;
-    guideCanvas.height = canvasHeight;
+    const chromeAddressBarHeight = windowWidth <= 1024 ? 56 : 0;
 
-    if (render) {
-        render.canvas.width = canvasWidth;
-        render.canvas.height = canvasHeight;
-        render.options.width = canvasWidth;
-        render.options.height = canvasHeight;
+    const availableHeight = windowHeight - chromeAddressBarHeight;
+
+    const aspectRatio = 4 / 9;
+    let newWidth, newHeight;
+
+    if (windowWidth <= 1024) {
+        if (windowWidth / availableHeight > aspectRatio) {
+            newHeight = availableHeight;
+            newWidth = newHeight * aspectRatio;
+        } else {
+            newWidth = windowWidth;
+            newHeight = newWidth / aspectRatio;
+        }
+        newHeight -= chromeAddressBarHeight;
+    } else {
+        newWidth = 400;
+        newHeight = 900;
     }
 
+    gameContainer.style.width = `${newWidth}px`;
+    gameContainer.style.height = `${newHeight}px`;
+    gameContainer.style.marginTop = '0';
+    
+    canvasWidth = newWidth;
+    canvasHeight = newHeight;
+    
     const horizontalMargin = canvasWidth / 20;
     const bottomMargin = canvasHeight / 7;
 
@@ -194,48 +229,59 @@ function resizeGame() {
 
     scorelineY = gameAreaTop + ((gameAreaBottom - gameAreaTop) * 0.2);
 
-    createBoundaries();
-
-    setGameBackground();
-
-    if (currentFruit) {
-        let scaleX = canvasWidth / oldWidth;
-        let newX = currentFruit.position.x * scaleX;
-        newX = Math.max(gameAreaLeft + currentFruit.circleRadius, Math.min(newX, gameAreaRight - currentFruit.circleRadius));
-        
-        Body.setPosition(currentFruit, {
-            x: newX,
-            y: currentFruit.position.y
-        });
-    } else {
-        createNewFruit();
+    if (render) {
+        render.canvas.width = canvasWidth;
+        render.canvas.height = canvasHeight;
+        render.options.width = canvasWidth;
+        render.options.height = canvasHeight;
     }
 
-    Composite.allBodies(world).forEach(body => {
-        if (body.label !== "topBoundary" && body.label !== "scoreLine" && !body.isStatic) {
-            let scaleX = canvasWidth / oldWidth;
-            let scaleY = canvasHeight / oldHeight;
-            let newX = body.position.x * scaleX;
-            let newY = body.position.y * scaleY;
-            
-            newX = Math.max(gameAreaLeft + body.circleRadius, Math.min(newX, gameAreaRight - body.circleRadius));
-            newY = Math.min(newY, gameAreaBottom - body.circleRadius);
+    if (backgroundCanvas) {
+        backgroundCanvas.width = canvasWidth;
+        backgroundCanvas.height = canvasHeight;
+    }
 
+    if (guideCanvas) {
+        guideCanvas.width = canvasWidth;
+        guideCanvas.height = canvasHeight;
+    }
+
+    createBoundaries();
+    setGameBackground();
+
+    adjustFruitsPosition();
+}
+
+function adjustFruitsPosition() {
+    const bodies = Composite.allBodies(world);
+    bodies.forEach(body => {
+        if (body.label !== "topBoundary" && body.label !== "scoreLine" && !body.isStatic) {
+            const newX = (body.position.x / oldWidth) * canvasWidth;
+            const newY = (body.position.y / oldHeight) * canvasHeight;
             Body.setPosition(body, {
                 x: newX,
                 y: newY
             });
         }
     });
+
+    if (currentFruit) {
+        const newX = (currentFruit.position.x / oldWidth) * canvasWidth;
+        Body.setPosition(currentFruit, {
+            x: newX,
+            y: currentFruit.position.y
+        });
+    }
+
+    oldWidth = canvasWidth;
+    oldHeight = canvasHeight;
 }
 
 function createBoundaries() {
-    // 기존 경계 제거
     Composite.clear(world, false, true);
 
     const wallThickness = 15;
 
-    // 왼쪽 벽
     const leftWall = Bodies.rectangle(
         gameAreaLeft + wallThickness / 2,
         gameAreaTop + (gameAreaBottom - gameAreaTop) / 2,
@@ -243,8 +289,6 @@ function createBoundaries() {
         gameAreaBottom - gameAreaTop,
         { isStatic: true, render: { visible: false } }
     );
-
-    // 오른쪽 벽
     const rightWall = Bodies.rectangle(
         gameAreaRight - wallThickness / 2,
         gameAreaTop + (gameAreaBottom - gameAreaTop) / 2,
@@ -252,8 +296,6 @@ function createBoundaries() {
         gameAreaBottom - gameAreaTop,
         { isStatic: true, render: { visible: false } }
     );
-
-    // 바닥
     const ground = Bodies.rectangle(
         gameAreaLeft + gameAreaWidth / 2,
         gameAreaBottom - wallThickness / 2,
@@ -261,8 +303,6 @@ function createBoundaries() {
         wallThickness,
         { isStatic: true, render: { visible: false } }
     );
-
-    // 상단 경계
     const top = Bodies.rectangle(
         gameAreaLeft + gameAreaWidth / 2,
         gameAreaTop,
@@ -275,8 +315,6 @@ function createBoundaries() {
             render: { visible: false }
         }
     );
-
-    // 점수 라인
     const scoreline = Bodies.rectangle(
         gameAreaLeft + gameAreaWidth / 2,
         scorelineY,
@@ -367,20 +405,25 @@ function addEventListeners() {
     console.log("Adding event listeners");
 
     const gameCanvas = document.getElementById('matter-js-canvas');
+    if (gameCanvas) {
+        gameCanvas.addEventListener('touchstart', handleGameInteraction, { passive: false });
+        gameCanvas.addEventListener('touchmove', handleGameInteraction, { passive: false });
+        gameCanvas.addEventListener('touchend', handleGameInteraction, { passive: false });
 
-    gameCanvas.addEventListener('touchstart', handleGameInteraction, { passive: false });
-    gameCanvas.addEventListener('touchmove', handleGameInteraction, { passive: false });
-    gameCanvas.addEventListener('touchend', handleGameInteraction, { passive: false });
-
-    gameCanvas.addEventListener('mousedown', handleGameInteraction);
-    gameCanvas.addEventListener('mousemove', handleGameInteraction);
-    gameCanvas.addEventListener('mouseup', handleGameInteraction);
+        gameCanvas.addEventListener('mousedown', handleGameInteraction);
+        gameCanvas.addEventListener('mousemove', handleGameInteraction);
+        gameCanvas.addEventListener('mouseup', handleGameInteraction);
+    }
 
     const restartButton = document.getElementById('restart-game-button');
-    restartButton.addEventListener('click', handleRestartClick);
+    if (restartButton) {
+        restartButton.addEventListener('click', handleRestartClick);
+    }
 
     const muteButton = document.getElementById('mute-button');
-    muteButton.addEventListener('click', toggleMute);
+    if (muteButton) {
+        muteButton.addEventListener('click', toggleMute);
+    }
 }
 
 function handleGameInteraction(event) {
@@ -545,6 +588,32 @@ function loadBestScore() {
     });
 }
 
+function updateUserIdDisplay() {
+    const userIdElement = document.getElementById('user-id');
+    if (userIdElement) {
+        userIdElement.textContent = userId;
+    }
+}
+
+function showUserIdOverlay() {
+    document.getElementById('user-id-overlay').style.display = 'flex';
+    document.getElementById('new-user-id').value = userId;
+}
+
+function hideUserIdOverlay() {
+    document.getElementById('user-id-overlay').style.display = 'none';
+}
+
+function saveNewUserId() {
+    const newUserId = document.getElementById('new-user-id').value.trim();
+    if (newUserId && newUserId !== userId) {
+        userId = newUserId;
+        localStorage.setItem('userId', userId);
+        updateUserIdDisplay();
+    }
+    hideUserIdOverlay();
+}
+
 function getUserId() {
     let userId = localStorage.getItem('userId');
     if (!userId) {
@@ -579,6 +648,7 @@ function pauseGame() {
     Runner.stop(runner);
     saveGameState();
     gamePaused = true;
+    bgmAudio.pause();
 }
 
 function resumeGame() {
@@ -588,6 +658,10 @@ function resumeGame() {
         Runner.run(runner, engine);
         gamePaused = false;
         requestAnimationFrame(gameLoop);
+    }
+
+    if (isBgmPlaying && !isMuted) {
+        bgmAudio.play();
     }
 }
 
@@ -629,7 +703,6 @@ function loadGameState() {
 
             createNewFruit();
 
-            // 점수 및 게임 상태 복원
             score = gameState.score;
             bestScore = gameState.bestScore;
             updateScore(0);
@@ -800,6 +873,14 @@ function showGameOverOverlay() {
         });
 }
 
+function showSettingsOverlay() {
+    document.getElementById('setting-overlay').style.display = 'flex';
+}
+
+function hideSettingsOverlay() {
+    document.getElementById('setting-overlay').style.display = 'none';
+}
+
 function handleCollision(event) {
     console.log("Collision detected");
     event.pairs.forEach((pair) => {
@@ -851,6 +932,12 @@ window.addEventListener('load', () => {
     closeLeaderboardButton.addEventListener('click', () => {
         document.getElementById('leaderboard-overlay').style.display = 'none';
     });
+
+    window.addEventListener('resize', () => {
+        if (navigator.standalone) {
+            document.documentElement.style.setProperty('--safe-area-inset-top', `${window.screen.height - document.documentElement.clientHeight}px`);
+        }
+    });
 });
 
 window.addEventListener('resize', () => {
@@ -872,7 +959,20 @@ export function toggleMute(event) {
     event.stopPropagation();
     isMuted = !isMuted;
     const muteButton = document.getElementById('mute-button');
-    muteButton.textContent = isMuted ? 'Unmute' : 'Mute';
+    muteButton.textContent = isMuted ? 'SFX On' : 'SFX Off';
+}
+
+function toggleBgm() {
+    const bgmButton = document.getElementById('bgm-button');
+    if (isBgmPlaying) {
+        bgmAudio.pause();
+        bgmButton.textContent = 'BGM On';
+        isBgmPlaying = false;
+    } else {
+        bgmAudio.play();
+        bgmButton.textContent = 'BGM Off';
+        isBgmPlaying = true;
+    }
 }
 
 export function showLeaderboard() {
@@ -887,7 +987,7 @@ export function showLeaderboard() {
                 score: childSnapshot.val().score
             });
         });
-        scores.sort((a, b) => b.score - a.score); // 내림차순 정렬
+        scores.sort((a, b) => b.score - a.score);
         displayLeaderboard(scores);
     }).catch((error) => {
         console.error("Error fetching leaderboard:", error);

@@ -2,83 +2,86 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Suika Game</title>
     <link rel="stylesheet" href="/src/styles.css">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6302044580293390"
      crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body>
     <div id="page-container">
-      <div id="left-ad" class="ad-space desktop-only">
-        <ins class="adsbygoogle"
-            style="display:block"
-            data-ad-client="ca-pub-6302044580293390"
-            data-ad-slot="7676563703"
-            data-ad-format="auto"
-            data-full-width-responsive="true"></ins>
-        <script>
-            (adsbygoogle = window.adsbygoogle || []).push({});
-        </script>
-      </div>
+        <div id="left-ad" class="ad-space desktop-only">
+            
+        </div>
 
-      <div id="game-container">
-          <canvas id="background-guide"></canvas>
-          <canvas id="guide-canvas"></canvas>
-          <div id="matter-js-canvas"></div>
-          <div id="game-ui">
-              <div id="top-ui">
-                  <div id="score-display">
-                      <div class="info-title">Score</div>
-                      <div id="score-value">0</div>
-                      <div id="best-score">Best: 0</div>
-                      <button id="top-score-button" class="control-button">Top Score</button>
-                  </div>
-                  <div id="next-fruit-preview">
-                      <div class="info-title">Next</div>
-                      <div id="next-fruit-image"></div>
-                  </div>
-                  <div id="control-buttons">
-                      <button id="restart-game-button" class="control-button">Restart</button>
-                      <button id="mute-button" class="control-button">Mute</button>
-                  </div>
-              </div>
-          </div>
-      </div>
+        <div id="game-container">
+            <canvas id="background-guide"></canvas>
+            <canvas id="guide-canvas"></canvas>
+            <div id="matter-js-canvas"></div>
+            <div id="game-ui">
+                <div id="top-ui">
+                    <div id="score-display">
+                        <div class="info-title">Score</div>
+                        <div id="score-value">0</div>
+                        <div id="best-score">Best: 0</div>
+                        <button id="top-score-button" class="control-button">Top Score</button>
+                    </div>
+                    <div id="next-fruit-preview">
+                        <div class="info-title">Next</div>
+                        <div id="next-fruit-image"></div>
+                    </div>
+                    <div id="control-buttons">
+                        <div id="user-id-display" class="info-button">
+                            <div class="info-title">User ID</div>
+                            <div id="user-id" class="green-button"></div>
+                        </div>
+                        <button id="setting-button" class="control-button">
+                            <i class="fas fa-cog"></i> Setting
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-      <div id="right-ad" class="ad-space desktop-only">
-        <ins class="adsbygoogle"
-            style="display:block"
-            data-ad-client="ca-pub-6302044580293390"
-            data-ad-slot="8358988357"
-            data-ad-format="auto"
-            data-full-width-responsive="true"></ins>
-        <script>
-            (adsbygoogle = window.adsbygoogle || []).push({});
-        </script>
-      </div>
+        <div id="right-ad" class="ad-space desktop-only">
+            
+        </div>
     </div>
 
-    <div id="bottom-ad">
-      <ins class="adsbygoogle"
-          style="display:block"
-          data-ad-client="ca-pub-6302044580293390"
-          data-ad-slot="1111155355"
-          data-ad-format="auto"
-          data-full-width-responsive="true"></ins>
-      <script>
-          (adsbygoogle = window.adsbygoogle || []).push({});
-      </script>
+    <div id="bottom-ad" class="ad-space">
+      
+    </div>
+
+    <div id="setting-overlay" class="overlay">
+        <div class="overlay-content">
+            <h2>Settings</h2>
+            <button id="restart-game-button" class="settings-button">Restart</button>
+            <button id="mute-button" class="settings-button">SFX Off</button>
+            <button id="bgm-button" class="settings-button">BGM On</button>
+            <br />
+            <button id="close-settings" class="settings-button red-button">Close</button>
+        </div>
+    </div>
+
+    <div id="user-id-overlay" class="overlay">
+        <div class="overlay-content">
+            <h2>Change User ID</h2>
+            <input type="text" id="new-user-id" placeholder="Enter new User ID">
+            <P></P>
+            <button id="save-user-id">Save</button>
+            <button id="cancel-user-id">Cancel</button>
+        </div>
     </div>
 
     <div id="game-over-overlay">
-      <div id="game-over-content">
-          <h1>Game Over</h1>
-          <p>Your Score</p>
-          <hr>
-          <p id="final-score">0</p>
-          <button id="restart-button">►</button>
-      </div>
+        <div id="game-over-content">
+            <h1>Game Over</h1>
+            <p>Your Score</p>
+            <hr>
+            <p id="final-score">0</p>
+            <button id="restart-button">►</button>
+        </div>
     </div>
 
     <div id="leaderboard-overlay">

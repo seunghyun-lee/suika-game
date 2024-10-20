@@ -2,30 +2,32 @@ body, html {
     margin: 0;
     padding: 0;
     height: 100%;
-    font-family: Arial, sans-serif;
+    width: 100%;
     overflow: hidden;
 }
 
 #page-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    min-height: 100vh;
-    padding: 20px;
-    box-sizing: border-box;
+    overflow: hidden;
     background-image: url('/images/background.png');
     background-size: cover;
     background-position: center;
-    overflow: hidden;
 }
 
 #game-container {
     position: relative;
     width: 400px;
     height: 900px;
+    max-width: 100vw;
+    max-height: 100vh;
     overflow: hidden;
-    border: 2px solid #333;
-    border-radius: 10px;
     background-color: rgba(255, 255, 255, 0.5);
 }
 
@@ -102,22 +104,93 @@ body, html {
     margin: 0 auto;
 }
 
+#user-id {
+    font-size: 14px;
+}
+
+#user-id-display {
+    margin-bottom: 10px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
 #control-buttons {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
+    gap: 5px;
 }
 
 .control-button {
-    margin-bottom: 10px;
-    padding: 10px;
+    padding: 5px;
     background-color: rgba(255, 255, 255, 0.7);
     border: 1px solid #333;
     border-radius: 5px;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 12px;
     width: 80px;
-    height: 40px;
+    height: 30px;
+}
+
+.control-button i {
+    margin-right: 5px;
+}
+
+.red-button {
+    background-color: #f44336 !important;
+}
+
+.red-button:hover {
+    background-color: #d32f2f !important;
+}
+
+.overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.overlay-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.settings-button {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+}
+
+.settings-button:hover {
+    background-color: #45a049;
+}
+
+#new-user-id {
+    margin: 10px 0;
+    padding: 5px;
+    width: 200px;
+}
+
+#save-user-id, #cancel-user-id {
+    margin: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
 }
 
 #best-score {
@@ -125,16 +198,61 @@ body, html {
     margin-top: 5px;
 }
 
+.info-button {
+    width: 80px;
+    background: rgba(186, 189, 197, 0.8);
+    border: 2px solid #525456;
+    border-radius: 10px;
+    padding: 5px;
+    text-align: center;
+    font-family: Arial, sans-serif;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-bottom: 5px;
+}
+
+.info-button:hover {
+    background-color: rgba(206, 209, 217, 0.8);
+}
+
+.info-title {
+    font-size: 12px;
+    font-weight: bold;
+    margin-bottom: 2px;
+}
+
+.green-button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.green-button:hover {
+    background-color: #45a049;
+}
+
 .ad-space {
-    width: 160px; /* 또는 원하는 크기 */
-    height: 600px; /* 또는 원하는 크기 */
-    margin: 0 20px;
+    width: 160px;
+    height: 600px;
+}
+
+#left-ad, #right-ad {
+    flex-shrink: 0;
+    width: 160px;
+    height: 600px;
 }
 
 #bottom-ad {
     width: 100%;
-    height: 90px; /* 또는 원하는 크기 */
-    margin-top: 20px;
+    height: 90px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
     text-align: center;
 }
 
@@ -143,12 +261,43 @@ body, html {
     color: #666;
 }
 
-@media (max-width: 1024px) and (min-width: 401px) {
+@media (min-width: 1025px) {
+    .desktop-only {
+        display: flex;
+    }
+    .mobile-only {
+        display: none;
+    }
+    #page-container {
+        justify-content: center;
+        gap: 20px;
+    }
+    #game-container {
+        margin: 0;
+    }
+}
+
+@media (max-width: 1024px) {
+    body, html, #page-container {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        padding: 0;
+    }
+    
     #game-container {
         width: 100%;
-        height: auto;
-        aspect-ratio: 4 / 9;
-        max-width: 400px;
+        height: 100%;
+        border: none;
+        border-radius: 0;
+    }
+    
+    .desktop-only {
+        display: none !important;
+    }
+
+    #bottom-ad {
+        height: 50px;
     }
 
     #background-guide,
@@ -169,53 +318,6 @@ body, html {
 
     .control-button {
         font-size: 14px;
-    }
-}
-
-@media (max-width: 1024px) {
-    .desktop-only {
-        display: none;
-    }
-
-    #bottom-ad {
-        height: 50px;
-    }
-}
-
-@media (min-width: 1024px) {
-    .desktop-only {
-        display: flex;
-    }
-    .mobile-only {
-        display: none;
-    }
-}
-
-/* Mobile styles */
-@media (max-width: 1023px) {
-    #page-container {
-        flex-direction: column;
-        align-items: center;
-        padding: 0;
-    }
-    #game-container {
-        width: 100%;
-        height: 100vh;
-        border: none;
-        border-radius: 0;
-    }
-
-    /* #control-buttons {
-        position: absolute;
-        bottom: 20px;
-        left: 0;
-        right: 0;
-    } */
-    .desktop-only {
-        display: none;
-    }
-    .mobile-only {
-        display: flex;
     }
 }
 
@@ -261,7 +363,7 @@ body, html {
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 12px;
 }
 
 #top-score-button:hover {
