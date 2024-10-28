@@ -1,4 +1,4 @@
-import { ref, set, get, query, orderByChild, limitToLast } from 'firebase/database';
+import { ref, set, get, query, orderByChild, limitToLast, push } from 'firebase/database';
 import * as Matter from 'matter-js';
 import { FRUITS } from './fruits';
 
@@ -22,6 +22,8 @@ let scorelineY;
 let guideCanvas, guideCtx;
 let userId;
 let isGameOver = false;
+let isScoreSaved = false;
+let isGameOverDisplayed = false;
 let boundariesCreated = false;
 let gamePaused = false;
 let gameInitialized = false;
@@ -708,7 +710,7 @@ function loadGameState() {
             updateScore(0);
 
             isGameOver = gameState.isGameOver;
-            if (isGameOver) {
+            if (isGameOver && !isGameOverDisplayed) {
                 showGameOverOverlay();
             } else {
                 hideGameOverOverlay();
@@ -790,7 +792,9 @@ function hideGameOverOverlay() {
 async function restartGame() {
     console.log("Restarting game");
 
+    isScoreSaved = false;
     isGameOver = false;
+    isGameOverDisplayed = false;
     score = 0;
     updateScore(0);
     lastDropPosition = null;
@@ -857,7 +861,7 @@ function captureGameState() {
 }
 
 function showGameOverOverlay() {
-    if (score === 0) {
+    if (isGameOverDisplayed || score === 0) {
         return;
     }
     const overlay = document.getElementById('game-over-overlay');
@@ -865,6 +869,7 @@ function showGameOverOverlay() {
     finalScoreElement.textContent = score;
     overlay.style.display = 'flex'; 
     isGameOver = true;
+    isGameOverDisplayed = true;
     
     const userId = getUserId();
     
@@ -876,10 +881,12 @@ function showGameOverOverlay() {
     })
     .then(() => {
         console.log("New score saved successfully");
+        isScoreSaved = true;
         saveGameState();
     })
     .catch((error) => {
         console.error("Error saving score:", error);
+        isScoreSaved = false;
     });
 }
 
@@ -889,6 +896,7 @@ function showSettingsOverlay() {
 
 function hideSettingsOverlay() {
     document.getElementById('setting-overlay').style.display = 'none';
+    isGameOverDisplayed = false;
 }
 
 function handleCollision(event) {
