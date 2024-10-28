@@ -857,20 +857,30 @@ function captureGameState() {
 }
 
 function showGameOverOverlay() {
+    if (score === 0) {
+        return;
+    }
     const overlay = document.getElementById('game-over-overlay');
     const finalScoreElement = document.getElementById('final-score');
     finalScoreElement.textContent = score;
     overlay.style.display = 'flex'; 
     isGameOver = true;
     
-    saveScoreToFirebase(score)
-        .then(() => {
-            console.log("Game over score saved");
-            saveGameState();
-        })
-        .catch((error) => {
-            console.error("Failed to save game over score:", error);
-        });
+    const userId = getUserId();
+    
+    const newScoreRef = push(ref(database, 'scores'));
+    set(newScoreRef, {
+        userId: userId,
+        score: score,
+        timestamp: Date.now()
+    })
+    .then(() => {
+        console.log("New score saved successfully");
+        saveGameState();
+    })
+    .catch((error) => {
+        console.error("Error saving score:", error);
+    });
 }
 
 function showSettingsOverlay() {
@@ -982,9 +992,10 @@ export function showLeaderboard() {
     get(topScoresQuery).then((snapshot) => {
         const scores = [];
         snapshot.forEach((childSnapshot) => {
+            const scoreData = childSnapshot.val();
             scores.push({
-                userId: childSnapshot.key,
-                score: childSnapshot.val().score
+                userId: scoreData.userId,
+                score: scoreData.score
             });
         });
         scores.sort((a, b) => b.score - a.score);
