@@ -236,22 +236,18 @@ body, html {
     background-color: #45a049;
 }
 
-#ad-space {
-    display: block;
+.ad-space {
     width: 160px;
     height: 600px;
 }
 
 #left-ad, #right-ad {
-    display: block;
+    flex-shrink: 0;
     width: 160px;
     height: 600px;
-    min-width: 160px;
-    min-height: 250px;
 }
 
 #bottom-ad {
-    display: block;
     width: 100%;
     height: 90px;
     position: fixed;
