@@ -56,7 +56,7 @@
     </div>
 
     <div id="bottom-ad" class="ad-space">
-        <ins class="adsbygoogle"
+        <ins class="adsbygoogle bottom-ad"
              style="display:block"
              data-ad-client="ca-pub-6302044580293390"
              data-ad-slot="1111155355"
@@ -106,7 +106,9 @@
     <script type="module" src="/src/main.js"></script>
     <script>
         let adsInitialized = false;
-
+        let lastActiveTime = Date.now();
+        const INACTIVITY_THRESHOLD = 30000; 
+    
         function initializeAds() {
             if (adsInitialized) return;
             
@@ -127,57 +129,72 @@
                 console.warn('AdSense initialization error:', e);
             }
         }
-
-        function checkAdsVisibility() {
-            const adContainers = document.querySelectorAll('.ad-space');
-            let visibleAds = false;
-
-            adContainers.forEach(container => {
-                if (window.getComputedStyle(container).display !== 'none') {
-                    visibleAds = true;
-                }
-            });
-
-            return visibleAds;
+    
+        function initializeInterstitial() {
+            if (typeof google === 'undefined' || !google.adsense || !google.adsense.push) {
+                return;
+            }
+    
+            try {
+                (adsbygoogle = window.adsbygoogle || []).push({
+                    google_ad_client: "ca-pub-6302044580293390",
+                    enable_page_level_ads: true,
+                    overlays: {text: true, flash: false}
+                });
+            } catch (e) {
+                console.warn('Interstitial ad initialization error:', e);
+            }
         }
-
-        function handleResize() {
-            const bottomAd = document.querySelector('.bottom-ad');
-            if (!bottomAd) return;
+    
+        document.addEventListener('visibilitychange', function() {
+            const now = Date.now();
             
-            if (window.innerWidth <= 767) {
-                bottomAd.style.width = '320px';
-                bottomAd.style.height = '50px';
-                bottomAd.style.display = 'block';
+            if (document.hidden) {
+                lastActiveTime = now;
             } else {
-                bottomAd.style.width = '728px';
-                bottomAd.style.height = '90px';
-                bottomAd.style.display = 'block';
+                if (now - lastActiveTime >= INACTIVITY_THRESHOLD) {
+                    showInterstitialAd();
+                }
+                lastActiveTime = now;
+            }
+        });
+    
+        function showInterstitialAd() {
+            if (typeof google !== 'undefined' && google.adsense && google.adsense.push) {
+                google.adsense.push(function() {
+                    google.adsense.showAdOverlay();
+                });
             }
         }
-
+    
+        function shouldShowAds() {
+            return window.innerWidth <= 767 || 
+                   (window.innerWidth > 767 && !document.querySelector('.desktop-only'));
+        }
+    
+        function adjustAdPositions() {
+            const bottomAd = document.getElementById('bottom-ad');
+            if (!bottomAd) return;
+    
+            if (window.innerWidth <= 767) {
+                bottomAd.style.display = 'block';
+                document.getElementById('game-container').style.paddingBottom = '50px';
+            } else {
+                bottomAd.style.display = 'none';
+                document.getElementById('game-container').style.paddingBottom = '0';
+            }
+        }
+    
         document.addEventListener('DOMContentLoaded', function() {
-            if (checkAdsVisibility()) {
-                setTimeout(initializeAds, 100);
-            }
+            initializeAds();
+            initializeInterstitial();
+            adjustAdPositions();
         });
-
-        window.addEventListener('load', function() {
-            if (!adsInitialized && checkAdsVisibility()) {
-                initializeAds();
-            }
-            handleResize();
-        });
-
+    
         let resizeTimeout;
         window.addEventListener('resize', function() {
             clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(function() {
-                handleResize();
-                if (!adsInitialized && checkAdsVisibility()) {
-                    initializeAds();
-                }
-            }, 250);
+            resizeTimeout = setTimeout(adjustAdPositions, 250);
         });
     </script>
 </body>

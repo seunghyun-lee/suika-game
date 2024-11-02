@@ -251,7 +251,24 @@ body, html {
 
 #bottom-ad {
     width: 728px;
-    height: 90px;
+    height: 50px;
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    background: white;
+    display: none; /* 기본적으로 숨김 */
+}
+
+@media (min-width: 768px) {
+    .mobile-only {
+        display: none !important;
+    }
+    
+    #bottom-ad {
+        display: none !important;
+    }
 }
 
 @media (max-width: 767px) {
@@ -260,8 +277,13 @@ body, html {
     }
     
     #bottom-ad {
+        display: block;
         width: 320px;
         height: 50px;
+    }
+    
+    #game-container {
+        padding-bottom: 50px;
     }
 }
 
