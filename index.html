@@ -105,33 +105,77 @@
 
     <script type="module" src="/src/main.js"></script>
     <script>
-        function initAds() {
-            try {                
-                if (window.adsbygoogle) {
-                    adsbygoogle.push({
-                        google_ad_client: "ca-pub-6302044580293390",
-                        enable_page_level_ads: true
-                    });
-                }
+        let adsInitialized = false;
+
+        function initializeAds() {
+            if (adsInitialized) return;
+            
+            try {
+                const adElements = document.querySelectorAll('ins.adsbygoogle');
+                
+                adElements.forEach(adElement => {
+                    if (!adElement.getAttribute('data-adsbygoogle-initialized')) {
+                        (adsbygoogle = window.adsbygoogle || []).push({
+                            element: adElement
+                        });
+                        adElement.setAttribute('data-adsbygoogle-initialized', 'true');
+                    }
+                });
+                
+                adsInitialized = true;
             } catch (e) {
                 console.warn('AdSense initialization error:', e);
             }
         }
 
+        function checkAdsVisibility() {
+            const adContainers = document.querySelectorAll('.ad-space');
+            let visibleAds = false;
+
+            adContainers.forEach(container => {
+                if (window.getComputedStyle(container).display !== 'none') {
+                    visibleAds = true;
+                }
+            });
+
+            return visibleAds;
+        }
+
+        function handleResize() {
+            const bottomAd = document.querySelector('.bottom-ad');
+            if (!bottomAd) return;
+            
+            if (window.innerWidth <= 767) {
+                bottomAd.style.width = '320px';
+                bottomAd.style.height = '50px';
+                bottomAd.style.display = 'block';
+            } else {
+                bottomAd.style.width = '728px';
+                bottomAd.style.height = '90px';
+                bottomAd.style.display = 'block';
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(initAds, 100);
+            if (checkAdsVisibility()) {
+                setTimeout(initializeAds, 100);
+            }
         });
+
+        window.addEventListener('load', function() {
+            if (!adsInitialized && checkAdsVisibility()) {
+                initializeAds();
+            }
+            handleResize();
+        });
+
         let resizeTimeout;
         window.addEventListener('resize', function() {
             clearTimeout(resizeTimeout);
             resizeTimeout = setTimeout(function() {
-                const bottomAd = document.getElementById('bottom-ad');
-                if (window.innerWidth <= 767) {
-                    bottomAd.style.width = '320px';
-                    bottomAd.style.height = '50px';
-                } else {
-                    bottomAd.style.width = '728px';
-                    bottomAd.style.height = '90px';
+                handleResize();
+                if (!adsInitialized && checkAdsVisibility()) {
+                    initializeAds();
                 }
             }, 250);
         });
