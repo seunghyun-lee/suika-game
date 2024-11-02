@@ -956,6 +956,14 @@ window.addEventListener('load', () => {
             document.documentElement.style.setProperty('--safe-area-inset-top', `${window.screen.height - document.documentElement.clientHeight}px`);
         }
     });
+    
+    if (window.adsbygoogle) {
+        try {
+            adsbygoogle.push({});
+        } catch (e) {
+            console.error('AdSense error:', e);
+        }
+    }
 });
 
 window.addEventListener('resize', () => {

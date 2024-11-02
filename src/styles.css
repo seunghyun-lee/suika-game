@@ -237,23 +237,40 @@ body, html {
 }
 
 .ad-space {
-    width: 160px;
-    height: 600px;
+    display: block;
+    margin: 10px auto;
+    text-align: center;
+    overflow: hidden;
 }
 
 #left-ad, #right-ad {
-    flex-shrink: 0;
     width: 160px;
     height: 600px;
+    min-height: 600px;
 }
 
 #bottom-ad {
-    width: 100%;
+    width: 728px;
     height: 90px;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    text-align: center;
+    min-height: 90px;
+}
+
+@media (max-width: 767px) {
+    .desktop-only {
+        display: none !important;
+    }
+    
+    #bottom-ad {
+        width: 320px;
+        height: 50px;
+        min-height: 50px;
+    }
+}
+
+@media (min-width: 768px) {
+    .desktop-only {
+        display: block;
+    }
 }
 
 .ad-placeholder {
