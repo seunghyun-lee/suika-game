@@ -250,15 +250,21 @@ body, html {
 }
 
 #bottom-ad {
-    width: 728px;
-    height: 50px;
     position: fixed;
     bottom: 0;
     left: 50%;
     transform: translateX(-50%);
+    width: 728px;
+    height: 50px;
     z-index: 1000;
     background: white;
-    display: none; /* 기본적으로 숨김 */
+    display: block;
+    margin: 0 auto;
+    text-align: center;
+}
+
+#game-container {
+    padding-bottom: 50px;
 }
 
 @media (min-width: 768px) {
@@ -272,18 +278,14 @@ body, html {
 }
 
 @media (max-width: 767px) {
-    .desktop-only {
-        display: none !important;
-    }
-    
     #bottom-ad {
-        display: block;
         width: 320px;
         height: 50px;
     }
     
-    #game-container {
-        padding-bottom: 50px;
+    #bottom-ad ins.adsbygoogle {
+        width: 320px !important;
+        height: 50px !important;
     }
 }
 
@@ -296,6 +298,21 @@ body, html {
 .ad-placeholder {
     font-size: 24px;
     color: #666;
+}
+
+.ad-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(255, 255, 255, 0.95);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    margin: 0;
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
 }
 
 @media (min-width: 1025px) {

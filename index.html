@@ -56,12 +56,10 @@
     </div>
 
     <div id="bottom-ad" class="ad-space">
-        <ins class="adsbygoogle bottom-ad"
-             style="display:block"
-             data-ad-client="ca-pub-6302044580293390"
-             data-ad-slot="1111155355"
-             data-ad-format="auto"
-             data-full-width-responsive="true"></ins>
+        <ins class="adsbygoogle"
+            style="display:inline-block;width:728px;height:50px"
+            data-ad-client="ca-pub-6302044580293390"
+            data-ad-slot="1111155355"></ins>
     </div>
 
     <div id="setting-overlay" class="overlay">
@@ -105,96 +103,42 @@
 
     <script type="module" src="/src/main.js"></script>
     <script>
-        let adsInitialized = false;
-        let lastActiveTime = Date.now();
-        const INACTIVITY_THRESHOLD = 30000; 
-    
         function initializeAds() {
-            if (adsInitialized) return;
-            
             try {
-                const adElements = document.querySelectorAll('ins.adsbygoogle');
-                
-                adElements.forEach(adElement => {
-                    if (!adElement.getAttribute('data-adsbygoogle-initialized')) {
-                        (adsbygoogle = window.adsbygoogle || []).push({
-                            element: adElement
-                        });
-                        adElement.setAttribute('data-adsbygoogle-initialized', 'true');
-                    }
-                });
-                
-                adsInitialized = true;
+                const adElement = document.querySelector('ins.adsbygoogle');
+                if (adElement && !adElement.getAttribute('data-adsbygoogle-initialized')) {
+                    (adsbygoogle = window.adsbygoogle || []).push({});
+                    adElement.setAttribute('data-adsbygoogle-initialized', 'true');
+                }
             } catch (e) {
                 console.warn('AdSense initialization error:', e);
             }
         }
-    
-        function initializeInterstitial() {
-            if (typeof google === 'undefined' || !google.adsense || !google.adsense.push) {
-                return;
-            }
-    
-            try {
-                (adsbygoogle = window.adsbygoogle || []).push({
-                    google_ad_client: "ca-pub-6302044580293390",
-                    enable_page_level_ads: true,
-                    overlays: {text: true, flash: false}
-                });
-            } catch (e) {
-                console.warn('Interstitial ad initialization error:', e);
-            }
-        }
-    
-        document.addEventListener('visibilitychange', function() {
-            const now = Date.now();
-            
-            if (document.hidden) {
-                lastActiveTime = now;
-            } else {
-                if (now - lastActiveTime >= INACTIVITY_THRESHOLD) {
-                    showInterstitialAd();
-                }
-                lastActiveTime = now;
-            }
-        });
-    
-        function showInterstitialAd() {
-            if (typeof google !== 'undefined' && google.adsense && google.adsense.push) {
-                google.adsense.push(function() {
-                    google.adsense.showAdOverlay();
-                });
-            }
-        }
-    
-        function shouldShowAds() {
-            return window.innerWidth <= 767 || 
-                   (window.innerWidth > 767 && !document.querySelector('.desktop-only'));
-        }
-    
-        function adjustAdPositions() {
+
+        function adjustAdSize() {
             const bottomAd = document.getElementById('bottom-ad');
-            if (!bottomAd) return;
-    
+            const adInsElement = bottomAd.querySelector('ins.adsbygoogle');
+            
             if (window.innerWidth <= 767) {
-                bottomAd.style.display = 'block';
-                document.getElementById('game-container').style.paddingBottom = '50px';
+                adInsElement.style.width = '320px';
+                adInsElement.style.height = '50px';
+                bottomAd.style.width = '320px';
             } else {
-                bottomAd.style.display = 'none';
-                document.getElementById('game-container').style.paddingBottom = '0';
+                adInsElement.style.width = '728px';
+                adInsElement.style.height = '50px';
+                bottomAd.style.width = '728px';
             }
         }
-    
+
         document.addEventListener('DOMContentLoaded', function() {
+            adjustAdSize();
             initializeAds();
-            initializeInterstitial();
-            adjustAdPositions();
         });
-    
+
         let resizeTimeout;
         window.addEventListener('resize', function() {
             clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(adjustAdPositions, 250);
+            resizeTimeout = setTimeout(adjustAdSize, 250);
         });
     </script>
 </body>
