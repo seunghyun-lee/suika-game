@@ -106,57 +106,85 @@
     <script type="module" src="/src/main.js"></script>
     <script>
         let adsInitialized = false;
+        let lastVisitTime = localStorage.getItem('lastVisitTime');
+        const INTERSTITIAL_INTERVAL = 5 * 60 * 1000;
     
         function initializeAds() {
-            if (adsInitialized) return;
-            
-            try {
+            try {                
                 const adElements = document.querySelectorAll('ins.adsbygoogle');
-                
                 adElements.forEach(adElement => {
                     if (!adElement.getAttribute('data-adsbygoogle-initialized')) {
                         (adsbygoogle = window.adsbygoogle || []).push({});
                         adElement.setAttribute('data-adsbygoogle-initialized', 'true');
                     }
                 });
-                
-                adsInitialized = true;
+
+                checkAndShowInterstitial();
             } catch (e) {
                 console.warn('AdSense initialization error:', e);
             }
         }
-    
-        function adjustAdVisibility() {
-            const bottomAd = document.getElementById('bottom-ad');
-            const isMobile = window.innerWidth <= 1024;
+
+        function checkAndShowInterstitial() {
+            const currentTime = Date.now();
             
-            if (isMobile) {
-                bottomAd.style.display = 'block';
-                document.querySelectorAll('.desktop-only').forEach(el => {
-                    el.style.display = 'none';
-                });
-            } else {
-                bottomAd.style.display = 'none';
-                document.querySelectorAll('.desktop-only').forEach(el => {
-                    el.style.display = 'block';
-                });
+            if (!lastVisitTime || (currentTime - lastVisitTime > INTERSTITIAL_INTERVAL)) {
+                showInterstitial();
+            }
+            
+            localStorage.setItem('lastVisitTime', currentTime);
+        }
+
+        function showInterstitial() {
+            try {
+                const interstitialContainer = document.createElement('div');
+                interstitialContainer.innerHTML = `
+                    <ins class="adsbygoogle"
+                        style="display:block"
+                        data-ad-client="ca-pub-6302044580293390"
+                        data-ad-slot="suikagame-bottom"
+                        data-ad-format="interstitial"></ins>
+                `;
+                document.body.appendChild(interstitialContainer);
+
+                (adsbygoogle = window.adsbygoogle || []).push({});
+            } catch (e) {
+                console.warn('Interstitial ad error:', e);
             }
         }
-    
+
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                const currentTime = Date.now();
+                const lastVisitTime = localStorage.getItem('lastVisitTime');
+                
+                if (lastVisitTime && (currentTime - lastVisitTime > INTERSTITIAL_INTERVAL)) {
+                    checkAndShowInterstitial();
+                }
+            }
+        });
+
         document.addEventListener('DOMContentLoaded', function() {
-            adjustAdVisibility();
-            setTimeout(initializeAds, 100);
+            initializeAds();
         });
-    
-        let resizeTimeout;
-        window.addEventListener('resize', function() {
-            clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(function() {
-                adjustAdVisibility();
-                adsInitialized = false;
-                initializeAds();
-            }, 250);
-        });
+
+        function adjustAdSizes() {
+            const bottomAd = document.getElementById('bottom-ad');
+            if (bottomAd) {
+                if (window.innerWidth <= 767) {
+                    bottomAd.style.width = '120px';
+                    bottomAd.style.height = '50px';
+                    const adIns = bottomAd.querySelector('ins.adsbygoogle');
+                    if (adIns) {
+                        adIns.style.width = '120px';
+                        adIns.style.height = '50px';
+                    }
+                }
+            }
+        }
+
+        window.addEventListener('resize', adjustAdSizes);
+        adjustAdSizes();
     </script>
 </body>
 </html>

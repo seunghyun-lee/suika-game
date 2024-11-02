@@ -30,7 +30,6 @@ body, html {
     max-height: 100vh;
     overflow: hidden;
     background-color: rgba(255, 255, 255, 0.5);
-    padding-bottom: 50px;
 }
 
 #background-guide, #guide-canvas {
@@ -269,9 +268,8 @@ body, html {
     height: 50px;
     z-index: 1000;
     background: white;
-    display: none;
-    margin: 0 auto;
     text-align: center;
+    display: none;
 }
 
 @media (min-width: 768px) {
@@ -286,13 +284,19 @@ body, html {
 
 @media (max-width: 767px) {
     #bottom-ad {
-        width: 320px;
-        height: 50px;
+        width: 120px !important;
+        height: 50px !important;
+        display: block;
     }
     
     #bottom-ad ins.adsbygoogle {
-        width: 320px !important;
+        width: 120px !important;
         height: 50px !important;
+        display: block !important;
+    }
+    
+    #game-container {
+        padding-bottom: 50px;
     }
 }
 
@@ -312,6 +316,7 @@ body, html {
     bottom: 0;
     left: 0;
     right: 0;
+    height: 50px;
     background: rgba(255, 255, 255, 0.95);
     z-index: 1000;
     display: flex;
@@ -324,18 +329,18 @@ body, html {
 
 @media (min-width: 1025px) {
     .desktop-only {
-        display: flex;
+        display: block !important;
     }
-    .mobile-only {
-        display: none;
-    }
+    
     #page-container {
         justify-content: center;
         gap: 20px;
     }
+    
     #game-container {
         margin: 0;
     }
+    
     #bottom-ad {
         display: none !important;
     }
@@ -351,9 +356,10 @@ body, html {
     
     #game-container {
         width: 100%;
-        height: 100%;
+        height: calc(100% - 50px); /* 하단 광고 높이만큼 제외 */
         margin: 0;
-        padding-bottom: 50px;
+        position: absolute;
+        top: 0;
     }
     
     .desktop-only {
@@ -362,34 +368,25 @@ body, html {
 
     #bottom-ad {
         display: block;
-        width: 320px;
-        height: 50px;
+        width: 120px !important;
+        height: 50px !important;
+        position: fixed;
+        bottom: 0;
     }
-
+    
     #bottom-ad ins.adsbygoogle {
-        display: block;
-        width: 320px !important;
+        display: block !important;
+        width: 120px !important;
         height: 50px !important;
     }
 
-    #background-guide,
-    #guide-canvas,
     #matter-js-canvas {
-        width: 100% !important;
-        height: 100% !important;
-    }
-    
-    #top-ui {
-        padding: 2vw;
+        height: calc(100% - 50px) !important;
     }
 
-    #score-display,
-    #next-fruit-preview {
-        font-size: 14px;
-    }
-
-    .control-button {
-        font-size: 14px;
+    #background-guide,
+    #guide-canvas {
+        height: calc(100% - 50px) !important;
     }
 }
 
