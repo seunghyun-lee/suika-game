@@ -12,12 +12,9 @@
 <body>
     <div id="page-container">
         <div id="left-ad" class="ad-space desktop-only">
-            <div id="left-ad" class="ad-space desktop-only">
-                <ins class="adsbygoogle"
-                     style="display:inline-block;width:160px;height:600px"
-                     data-ad-client="ca-pub-6302044580293390"
-                     data-ad-slot="YOUR_LEFT_AD_SLOT"></ins>
-            </div>
+            <script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
         </div>
 
         <div id="game-container">
@@ -50,20 +47,16 @@
         </div>
 
         <div id="right-ad" class="ad-space desktop-only">
-            <ins class="adsbygoogle"
-                 style="display:inline-block;width:160px;height:600px"
-                 data-ad-client="ca-pub-6302044580293390"
-                 data-ad-slot="YOUR_RIGHT_AD_SLOT"></ins>
+            <script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
         </div>
     </div>
 
     <div id="bottom-ad" class="ad-space">
-        <ins class="adsbygoogle"
-             style="display:inline-block"
-             data-ad-client="ca-pub-6302044580293390"
-             data-ad-slot="1111155355"
-             data-ad-format="auto"
-             data-full-width-responsive="true"></ins>
+        <script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
     </div>
 
     <div id="setting-overlay" class="overlay">
@@ -107,45 +100,22 @@
 
     <script type="module" src="/src/main.js"></script>
     <script>
-        // AdSense 초기화 함수
         function initAds() {
-            try {
-                // 기존 광고가 있는지 확인
-                const existingAds = document.querySelectorAll('ins.adsbygoogle');
-                let hasExistingAds = false;
-                
-                existingAds.forEach(ad => {
-                    if (ad.getAttribute('data-adsbygoogle-status') === 'done') {
-                        hasExistingAds = true;
-                    }
-                });
-    
-                // 새로운 광고만 초기화
-                if (!hasExistingAds && window.adsbygoogle) {
-                    existingAds.forEach(ad => {
-                        (adsbygoogle = window.adsbygoogle || []).push({});
+            try {                
+                if (window.adsbygoogle) {
+                    adsbygoogle.push({
+                        google_ad_client: "ca-pub-6302044580293390",
+                        enable_page_level_ads: true
                     });
                 }
             } catch (e) {
                 console.warn('AdSense initialization error:', e);
             }
         }
-    
-        // DOMContentLoaded 이벤트에서 광고 초기화
+
         document.addEventListener('DOMContentLoaded', function() {
-            // 광고 컨테이너가 보이는지 확인
-            const adContainers = document.querySelectorAll('.ad-space');
-            adContainers.forEach(container => {
-                if (window.getComputedStyle(container).display !== 'none') {
-                    container.style.visibility = 'visible';
-                }
-            });
-    
-            // 일정 시간 후 광고 초기화 (컨테이너가 완전히 렌더링될 때까지 대기)
             setTimeout(initAds, 100);
         });
-    
-        // 리사이즈 이벤트에서 광고 크기 조정
         let resizeTimeout;
         window.addEventListener('resize', function() {
             clearTimeout(resizeTimeout);
@@ -160,6 +130,6 @@
                 }
             }, 250);
         });
-        </script>
+    </script>
 </body>
 </html>
