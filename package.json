@@ -9,7 +9,8 @@
     "preview": "vite preview"
   },
   "devDependencies": {
-    "vite": "^5.4.1"
+    "vite": "^5.4.1",
+    "vite-plugin-sitemap": "^0.7.1"
   },
   "dependencies": {
     "firebase": "^10.14.1",
